@@ -1,13 +1,13 @@
 export const config = {
   "dev": {
-    "username": "",
-    "password": "",
-    "database": "",
-    "host": "",
+    "username": "pontikasdb",
+    "password": "t3fwrsidDiJ6vRP",
+    "database": "pontikasdb",
+    "host": "pontikasdb.crtkvdvwlnm8.eu-west-3.rds.amazonaws.com",
     "dialect": "postgres",
-    "aws_region": "us-east-2",
+    "aws_region": "eu-west-3",
     "aws_profile": "default",
-    "aws_media_bucket": "udagram-ruttner-dev"
+    "aws_media_bucket": "pontikasdb-bucky-dev"
   },
   "prod": {
     "username": "",
