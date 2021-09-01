@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import {IndexRouter} from "./V0/index.router";
 
 (async () => {
 
@@ -29,6 +30,8 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   /**************************************************************************** */
 
+  app.use("/api/v0/", IndexRouter)
+    
   //! END @TODO1
   
   // Root Endpoint
@@ -36,7 +39,18 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   app.get( "/", async ( req, res ) => {
     res.send("try GET /filteredimage?image_url={{}}")
   } );
-  
+
+  app.get( "/filteredimage", async ( req, res ) => {
+    let {imgurl, amount} = req.query;
+    let test1 = req.query;
+    let {imgType} = req.query;
+    const test2 = req.query;
+    let test3 = test1.imgType;
+    if(!imgurl)
+      return res.status(400).send("Ton mpoulo");
+    
+    return res.send("OK")
+  } );
 
   // Start the Server
   app.listen( port, () => {
