@@ -41,15 +41,20 @@ import {IndexRouter} from "./V0/index.router";
   } );
 
   app.get( "/filteredimage", async ( req, res ) => {
-    let {imgurl, amount} = req.query;
-    let test1 = req.query;
-    let {imgType} = req.query;
-    const test2 = req.query;
-    let test3 = test1.imgType;
-    if(!imgurl)
+    let {img_url} = req.query;
+
+    if (!img_url)
       return res.status(400).send("Ton mpoulo");
     
-    return res.send("OK")
+    try {
+      const storePath: string = await filterImageFromURL(img_url);
+      return res.status(200).send("Stored image:" + img_url + "\n to :" + storePath);  
+    } 
+    catch(e)
+    {
+      return res.status(400).send("Image url not accessible!\n"+e)
+    }
+    
   } );
 
   // Start the Server
