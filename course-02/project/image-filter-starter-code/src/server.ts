@@ -1,7 +1,8 @@
-import express from 'express';
+import express, {Request, NextFunction, Response, Errback} from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 import {IndexRouter} from "./V0/index.router";
+import fs from "fs";
 
 (async () => {
 
@@ -39,21 +40,34 @@ import {IndexRouter} from "./V0/index.router";
   app.get( "/", async ( req, res ) => {
     res.send("try GET /filteredimage?image_url={{}}")
   } );
-
+  
+  function cleanUp(err:Errback) {
+    next();
+  }
+  app.use(cleanUp)
+  
+  app.use((req,resp,next)=>{
+    next()
+  })
+  
   app.get( "/filteredimage", async ( req, res ) => {
     let {img_url} = req.query;
-
+    let storePath:string="";
     if (!img_url)
-      return res.status(400).send("Ton mpoulo");
-    
+      return res.status(400).send("img_url is missing.");
+
     try {
-      const storePath: string = await filterImageFromURL(img_url);
-      return res.status(200).send("Stored image:" + img_url + "\n to :" + storePath);  
-    } 
-    catch(e)
-    {
-      return res.status(400).send("Image url not accessible!\n"+e)
+      storePath = await filterImageFromURL(img_url);
+      //return res.status(200).send("Stored image:" + img_url + "\n to :" + storePath);
+      return res.status(200).sendFile(storePath, cleanUp);
+    } catch (e) {
+      return res.status(404).send("Image url is not accessible!\n" + e);
+    } finally {
+      // if(fs.existsSync(storePath))
+      //   await deleteLocalFiles([storePath])
     }
+
+  },(req,resp,next)=>{
     
   } );
 
