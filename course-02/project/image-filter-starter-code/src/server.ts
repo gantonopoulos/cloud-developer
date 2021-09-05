@@ -1,8 +1,7 @@
 import express, {Request, NextFunction, Response, Errback} from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
-import {IndexRouter} from "./V0/index.router";
-import fs from "fs";
+
 
 (async () => {
 
@@ -30,50 +29,45 @@ import fs from "fs";
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
-
-  app.use("/api/v0/", IndexRouter)
     
   //! END @TODO1
   
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
+  app.get("/", async (req, res, next) => {
     res.send("try GET /filteredimage?image_url={{}}")
-  } );
-  
-  function cleanUp(err:Errback) {
-    next();
-  }
-  app.use(cleanUp)
-  
-  app.use((req,resp,next)=>{
-    next()
-  })
-  
-  app.get( "/filteredimage", async ( req, res ) => {
-    let {img_url} = req.query;
-    let storePath:string="";
-    if (!img_url)
-      return res.status(400).send("img_url is missing.");
+  });
 
-    try {
-      storePath = await filterImageFromURL(img_url);
-      //return res.status(200).send("Stored image:" + img_url + "\n to :" + storePath);
-      return res.status(200).sendFile(storePath, cleanUp);
-    } catch (e) {
-      return res.status(404).send("Image url is not accessible!\n" + e);
-    } finally {
-      // if(fs.existsSync(storePath))
-      //   await deleteLocalFiles([storePath])
+  function cleanFileOnSuccess(filePath: string): (_: Error) => void {
+    return (error) => {
+      if (error)
+        console.log('Image could not be sent:' + error)
+      else
+        deleteLocalFiles([filePath])
     }
+  }
+  
+  function sendImageAndCleanUp(res: Response): (imageStorePath: string) => void {
+    return (imageStorePath) => {
+      return res.status(200).sendFile(imageStorePath, cleanFileOnSuccess(imageStorePath));
+    }
+  }
 
-  },(req,resp,next)=>{
-    
-  } );
+  app.get("/filteredimage", async (request, response) => {
+    let {img_url} = request.query;
+    if (!img_url)
+      return response.status(400).send("img_url is missing.");
+
+    await filterImageFromURL(img_url)
+        .then(sendImageAndCleanUp(response))
+        .catch((error) => {
+          return response.status(404).send("Image url is not accessible!\n" + error);
+        });
+  });
 
   // Start the Server
-  app.listen( port, () => {
-      console.log( `server running http://localhost:${ port }` );
-      console.log( `press CTRL+C to stop server` );
-  } );
+  app.listen(port, () => {
+    console.log(`server running http://localhost:${port}`);
+    console.log(`press CTRL+C to stop server`);
+  });
 })();
