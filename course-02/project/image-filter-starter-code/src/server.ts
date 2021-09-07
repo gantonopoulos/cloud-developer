@@ -54,9 +54,9 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   }
 
   app.get("/filteredimage", async (request, response) => {
-    let {img_url: image_url} = request.query;
+    let {image_url} = request.query;
     if (!image_url)
-      return response.status(400).send("img_url is missing.");
+      return response.status(400).send("image_url is missing.");
 
     await filterImageFromURL(image_url)
         .then(sendImageAndCleanUp(response))
