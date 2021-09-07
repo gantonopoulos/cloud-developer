@@ -54,11 +54,11 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   }
 
   app.get("/filteredimage", async (request, response) => {
-    let {img_url} = request.query;
-    if (!img_url)
+    let {img_url: image_url} = request.query;
+    if (!image_url)
       return response.status(400).send("img_url is missing.");
 
-    await filterImageFromURL(img_url)
+    await filterImageFromURL(image_url)
         .then(sendImageAndCleanUp(response))
         .catch((error) => {
           return response.status(404).send("Image url is not accessible!\n" + error);
