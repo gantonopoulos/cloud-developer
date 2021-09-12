@@ -1,8 +1,13 @@
+import http, {ClientRequest, IncomingMessage} from "http";
 import { Router, Request, Response } from 'express';
 import { FeedItem } from '../models/FeedItem';
 import { requireAuth } from '../../users/routes/auth.router';
 import * as AWS from '../../../../aws';
 import {config} from "../../../../config/config";
+import {Readable} from "stream";
+import {RequestOptions} from "https";
+import * as https from "https";
+
 
 const router: Router = Router();
 
@@ -101,9 +106,67 @@ router.post('/',
 router.post('/filteredimage',
     requireAuth,
     async (req: Request, res: Response) => {
+        const image_name:string = req.body.image_name;
+        const image_source:string = req.body.image_src_url;
         
-        //res.redirect(config.dev.image_filter_server + req.url);
-        res.send(config.dev.image_filter_server + req.url);
+        if (!image_source)
+            return res.status(400).send("image_src_url is missing.");
+
+        if (!image_name)
+            return res.status(400).send("image_name is missing.");
+        
+        
+        const signed_url:URL = new URL(AWS.getPutSignedUrl(image_name));
+
+        let responseImgData:any = ''
+        let count:number = 0;
+        let filterOptions:RequestOptions = {
+            headers:{
+                'Content-Type': 'image/jpg'
+            }
+        }
+        
+        const resp = http.get(config.dev.image_filter_server + '/filteredimage/?image_url=' +image_source, filterOptions,
+            (responseMsg: IncomingMessage) => {
+                
+                responseMsg.on('data', (chuck) => {
+                    responseImgData += chuck;
+                });
+
+                responseMsg.on('end', () => {
+                    const options: RequestOptions = {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'image/jpg',
+                            'Content-Length': Buffer.byteLength(responseImgData)
+                        }
+                    }
+                    const putRequest: ClientRequest = https.request(signed_url, options,(s3Response)=>{
+                        if(s3Response.statusCode != 200){
+                            let error = new Error('Put request to S3 bucket failed.\n' +
+                                `Status Code: ${s3Response.statusCode}`);
+                            console.error(error.message);
+                            s3Response.destroy(error);
+                            return;
+                        }
+                    });
+                    putRequest.write(responseImgData);
+                    putRequest.end();
+                    res.send(AWS.getGetSignedUrl(image_name));
+                })
+
+                if (responseMsg.statusCode !== 200) {
+                    let error = new Error('Request to image filter server failed.\n' +
+                        `Status Code: ${responseMsg.statusCode}`);
+                    console.error(error.message);
+                    responseMsg.destroy(error);
+                    return;
+                }
+            });
+        resp.on('error',(e)=>{
+                console.log('Got error: ${e.message}')
+            res.send(e.message)
+        })
 });
 
 export const FeedRouter: Router = router;
