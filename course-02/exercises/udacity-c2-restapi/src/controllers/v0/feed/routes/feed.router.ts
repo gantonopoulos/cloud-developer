@@ -102,6 +102,29 @@ router.post('/',
     res.status(201).send(saved_item);
 });
 
+function UploadImage(image_name:string, filteredImageData:Buffer) {
+    const uploadOptions: RequestOptions = {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'image/jpeg',
+            'Content-Length': Buffer.byteLength(filteredImageData)
+        }
+    }
+    const signed_upload_url: URL = new URL(AWS.getPutSignedUrl(image_name));
+    const uploadToS3Request: ClientRequest = https.request(signed_upload_url, uploadOptions,
+        (s3Response) => {
+            if (s3Response.statusCode != 200) {
+                let error = new Error('Put request to S3 bucket failed.\n' +
+                    `Status Code: ${s3Response.statusCode}`);
+                console.error(error.message);
+                s3Response.destroy(error);
+                return;
+            }
+        });
+    uploadToS3Request.write(filteredImageData);
+    uploadToS3Request.end();
+}
+
 
 router.post('/filteredimage',
     requireAuth,
@@ -114,58 +137,31 @@ router.post('/filteredimage',
 
         if (!image_name)
             return res.status(400).send("image_name is missing.");
-        
-        const signed_url:URL = new URL(AWS.getPutSignedUrl(image_name));
 
-        let filteredImageData:Buffer
-        let filterOptions:RequestOptions = {
-            headers:{
-                'Content-Type': 'image/jpg'
-            }
-        }
-        
-        const filteringResponse = http.get(config.dev.image_filter_server + '/filteredimage/?image_url=' +image_source, filterOptions,
-            (responseMsg: IncomingMessage) => {
-
-                responseMsg.on('data', (chunk) => {
-                    filteredImageData = Buffer.from(chunk);
-                    
-                    console.log(Buffer.isEncoding('base64'))
-                });
-
-                responseMsg.on('end', () => {
-                    const uploadOptions: RequestOptions = {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'image/jpeg',
-                            'Content-Length': Buffer.byteLength(filteredImageData)
-                        }
-                    }
-                    const putRequest: ClientRequest = https.request(signed_url, uploadOptions,
-                        (s3Response) => {
-                            if (s3Response.statusCode != 200) {
-                                let error = new Error('Put request to S3 bucket failed.\n' +
-                                    `Status Code: ${s3Response.statusCode}`);
-                                console.error(error.message);
-                                s3Response.destroy(error);
-                                return;
-                            }
-                        });
-                    putRequest.write(filteredImageData);
-                    putRequest.end();
-                    res.send(AWS.getGetSignedUrl(image_name));
-                })
-
-                if (responseMsg.statusCode !== 200) {
+        const filteringResponse = http.get(
+            config.dev.image_filter_server + '/filteredimage/?image_url=' + image_source,
+            (filteringResponse: IncomingMessage) => {
+                if (filteringResponse.statusCode !== 200) {
                     let error = new Error('Request to image filter server failed.\n' +
-                        `Status Code: ${responseMsg.statusCode}`);
+                        `Status Code: ${filteringResponse.statusCode}`);
                     console.error(error.message);
-                    responseMsg.destroy(error);
+                    filteringResponse.destroy(error);
                     return;
                 }
+                
+                let filteredImageData:Buffer
+                filteringResponse.on('data', (chunk) => {
+                    filteredImageData = Buffer.from(chunk);
+                });
+
+                filteringResponse.on('end', () => {
+                    UploadImage(image_name, filteredImageData);
+                    res.send(AWS.getGetSignedUrl(image_name));
+                })
             });
+        
         filteringResponse.on('error', (e) => {
-            console.log('Got error: ${e.message}')
+            console.log('Error: ${e.message}')
             res.send(e.message)
         })
 });
