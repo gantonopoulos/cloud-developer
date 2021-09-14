@@ -111,6 +111,7 @@ function UploadImage(image_name:string, filteredImageData:Buffer) {
         }
     }
     const signed_upload_url: URL = new URL(AWS.getPutSignedUrl(image_name));
+    console.log("Uploading image to S3. Put-Signed-Url:["+signed_upload_url+"]");
     const uploadToS3Request: ClientRequest = https.request(signed_upload_url, uploadOptions,
         (s3Response) => {
             if (s3Response.statusCode != 200) {
@@ -138,6 +139,7 @@ router.post('/filteredimage',
         if (!image_name)
             return res.status(400).send("image_name is missing.");
 
+        console.log("Sending to filtering service:[" + config.dev.image_filter_server + '/filteredimage/?image_url=' + image_source + "]");
         const filteringResponse = http.get(
             config.dev.image_filter_server + '/filteredimage/?image_url=' + image_source,
             (filteringResponse: IncomingMessage) => {
