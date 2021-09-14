@@ -146,7 +146,7 @@ router.post('/filteredimage',
                         `Status Code: ${filteringResponse.statusCode}`);
                     console.error(error.message);
                     filteringResponse.destroy(error);
-                    return;
+                    return res.status(filteringResponse.statusCode).send(error.message);
                 }
                 
                 let filteredImageData:Buffer
