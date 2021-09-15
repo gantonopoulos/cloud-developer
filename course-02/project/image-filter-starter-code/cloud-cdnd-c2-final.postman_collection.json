@@ -79,7 +79,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{EBS_IMG_FILTER_HOST}}/filteredimage/?image_url=https://apod.nasa.gov/apod/image/2109/FireFlyMilkyWay_Komlev_1446.jpg",
+					"raw": "{{EBS_IMG_FILTER_HOST}}/filteredimage/?image_url={{IMG1_URL}}",
 					"host": [
 						"{{EBS_IMG_FILTER_HOST}}"
 					],
@@ -90,7 +90,7 @@
 					"query": [
 						{
 							"key": "image_url",
-							"value": "https://apod.nasa.gov/apod/image/2109/FireFlyMilkyWay_Komlev_1446.jpg"
+							"value": "{{IMG1_URL}}"
 						}
 					]
 				}
@@ -213,6 +213,14 @@
 		{
 			"key": "EBS_IMG_FILTER_HOST",
 			"value": "http://pontifikas-udacity-project2-dev.eu-west-3.elasticbeanstalk.com"
+		},
+		{
+			"key": "IMG1_URL",
+			"value": "https://apod.nasa.gov/apod/image/2109/FireFlyMilkyWay_Komlev_1446.jpg"
+		},
+		{
+			"key": "IMG2_URL",
+			"value": "https://apod.nasa.gov/apod/image/2109/AuroraIceland_Necchi_1280.jpg"
 		}
 	]
 }
