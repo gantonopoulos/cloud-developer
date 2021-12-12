@@ -9,11 +9,14 @@ import { getUserId } from '../utils';
 
 // TODO: Get all TODO items for a current user
 export const handler = middy(
-    async (_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     // Write your code here
     const todos = '...'
 
     return undefined
-    })
-    
-handler.use(cors({credentials: true}))
+
+handler.use(
+  cors({
+    credentials: true
+  })
+)
