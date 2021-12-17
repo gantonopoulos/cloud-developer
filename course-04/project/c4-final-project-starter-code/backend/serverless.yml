@@ -24,7 +24,7 @@ provider:
 #   # ${self:provider.environment.ATTACHMENT_S3_BUCKET}
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
-#     TODOS_CREATED_AT_INDEX: CreatedAtIndex
+    TODOS_CREATED_AT_INDEX: CreatedAtIndex
 #     ATTACHMENT_S3_BUCKET: serverless-c4-todo-images-${self:provider.stage}
 #     SIGNED_URL_EXPIRATION: 300
 
@@ -121,17 +121,28 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         KeySchema:
-          - AttributeName: todoId
+          - AttributeName: userId
             KeyType: HASH
-          - AttributeName: createdAt
+          - AttributeName: todoId
             KeyType: RANGE
         AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
           - AttributeName: todoId
             AttributeType: S
           - AttributeName: createdAt
             AttributeType: S
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODOS_TABLE}
+        LocalSecondaryIndexes:
+            - IndexName: ${self:provider.environment.TODOS_CREATED_AT_INDEX}
+              KeySchema:
+                - AttributeName: userId
+                  KeyType: HASH
+                - AttributeName: createdAt
+                  KeyType: RANGE
+              Projection:
+                ProjectionType: ALL        
 # 
 #     # TODO: Complete the bucket properties below. 
 #     # Do not forget to add the CorsConfiguration propoerty
