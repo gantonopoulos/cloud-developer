@@ -1,8 +1,10 @@
 import * as uuid from 'uuid'
-import {TodoItem} from "../models/TodoItem";
+import {TodoItem, TodoItemKey} from "../models/TodoItem";
 import {TodoAccess} from "../dataLayer/todoAccess";
 import {CreateTodoRequest} from "../requests/CreateTodoRequest";
 import {parseUserId} from "../auth/utils";
+import {UpdateTodoRequest} from "../requests/UpdateTodoRequest";
+import {TodoUpdate} from "../models/TodoUpdate";
 
 const todoAccess = new TodoAccess();
 
@@ -29,4 +31,20 @@ export async function createTodo(
         done: false,
         attachmentUrl:"TBD"
     })
+}
+
+
+export async function updateTodo( todoIdToUpdate:string, updateRequest:UpdateTodoRequest, jwtToken: string)
+{
+    const keyOfItemToUpdate:TodoItemKey = {
+        todoId : todoIdToUpdate,
+        userId: parseUserId(jwtToken)
+    }
+    
+    const updatedItemData: TodoUpdate = {
+        name:updateRequest.name,
+        dueDate:updateRequest.dueDate,
+        done:updateRequest.done
+    }
+    await todoAccess.updateTodo(keyOfItemToUpdate, updatedItemData)
 }

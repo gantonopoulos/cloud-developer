@@ -40,6 +40,7 @@ provider:
             - dynamodb:Scan
             - dynamodb:PutItem
             - dynamodb:GetItem
+            - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}      
 #         - Effect: Allow
 #           Action:
@@ -82,13 +83,18 @@ functions:
 
 #   # TODO: Configure this function
 #   # Provide property for setting up CORS, Authorizer, iamRoleStatements, and request schemas
-#   UpdateTodo:
-#     handler: src/lambda/http/updateTodo.handler
-#     events:
-#       - http:
-#           method: patch
-#           path: todos/{todoId}
-# 
+  UpdateTodo:
+    handler: src/lambda/http/updateTodo.handler
+    events:
+      - http:
+          method: patch
+          path: todos/{todoId}
+          cors: true
+#          authorizer: Auth
+          request:
+            schemas:
+                application/json: ${file(models/update-todo-model.json)}
+                
 #   # TODO: Configure this function
 #   # Provide property for setting up CORS, Authorizer, iamRoleStatements
 #   DeleteTodo:
