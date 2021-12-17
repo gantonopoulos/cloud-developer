@@ -1,8 +1,6 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import {TodoItem} from "../models/TodoItem";
 
- 
-
 export class TodoAccess {
 
     constructor(
@@ -20,5 +18,15 @@ export class TodoAccess {
             .promise()
         console.log('Found '+todos.Count+' items!')
         return todos.Items as TodoItem[];
+    }
+
+    async createTodo(todoItem: TodoItem) {
+        console.log('Creating TODO item ' + todoItem.todoId)
+        await this.dynamoDbClient.put({
+            TableName: process.env.TODOS_TABLE,
+            Item: todoItem
+        }).promise()
+
+        return todoItem
     }
 }
