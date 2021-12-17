@@ -48,3 +48,12 @@ export async function updateTodo( todoIdToUpdate:string, updateRequest:UpdateTod
     }
     await todoAccess.updateTodo(keyOfItemToUpdate, updatedItemData)
 }
+
+export async function deleteTodo( todoIdToUpdate:string, jwtToken: string)
+{
+    const keyOfItemToUpdate:TodoItemKey = {
+        todoId : todoIdToUpdate,
+        userId: parseUserId(jwtToken)
+    }
+    await todoAccess.deleteTodo(keyOfItemToUpdate)
+}

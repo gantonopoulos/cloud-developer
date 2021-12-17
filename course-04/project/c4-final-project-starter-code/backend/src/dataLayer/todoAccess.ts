@@ -55,4 +55,19 @@ export class TodoAccess {
         console.log('Sending update params' + JSON.stringify(updateParams))
         await this.dynamoDbClient.update(updateParams).promise()
     }
+
+    async deleteTodo(keyOfItemToUpdate:TodoItemKey) {
+
+        console.log('Updating TODO item ' + keyOfItemToUpdate.todoId)
+        const deleteItemInput:DocumentClient.DeleteItemInput = {
+            TableName: process.env.TODOS_TABLE,
+            Key: {
+                'todoId': keyOfItemToUpdate.todoId,
+                'userId': keyOfItemToUpdate.userId
+            },
+        }
+
+        console.log('Sending update params' + JSON.stringify(deleteItemInput))
+        await this.dynamoDbClient.delete(deleteItemInput).promise()
+    }
 }
