@@ -57,3 +57,12 @@ export async function deleteTodo( todoIdToUpdate:string, jwtToken: string)
     }
     await todoAccess.deleteTodo(keyOfItemToUpdate)
 }
+
+
+export async function todoExists(todoIdToUpdate: string, jwtToken: string): Promise<TodoItem> {
+    const keyOfItemToUpdate: TodoItemKey = {
+        todoId: todoIdToUpdate,
+        userId: parseUserId(jwtToken)
+    }
+    return await todoAccess.getTodo(keyOfItemToUpdate);
+}

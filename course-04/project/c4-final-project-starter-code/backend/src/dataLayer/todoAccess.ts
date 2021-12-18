@@ -21,6 +21,22 @@ export class TodoAccess {
         return todos.Items as TodoItem[];
     }
 
+    async getTodo(withKey:TodoItemKey): Promise<TodoItem> {
+        console.log('Querying todo [Id,UserId] :[' + withKey.todoId + "," + withKey.userId + "]")
+        const queryResult = await this.dynamoDbClient
+            .query({
+                TableName: process.env.TODOS_TABLE,
+                KeyConditionExpression:"todoId = :todoIdToGet and userId = :userIdToGet",
+                ExpressionAttributeValues:{
+                    ":todoIdToGet":withKey.todoId,
+                    ":userIdToGet":withKey.userId
+                }
+            })
+            .promise()
+        
+        return queryResult.Items[0] as TodoItem;
+    }
+
     async createTodo(todoItem: TodoItem) {
         console.log('Creating TODO item ' + todoItem.todoId)
         await this.dynamoDbClient.put({
