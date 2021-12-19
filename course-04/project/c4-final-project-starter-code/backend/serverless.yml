@@ -58,8 +58,8 @@ provider:
 
 functions:
 
-#   Auth:
-#     handler: src/lambda/auth/auth0Authorizer.handler
+  Auth:
+    handler: src/lambda/auth/auth0Authorizer.handler
 
   # TODO: Configure this function - 
   # Provide iamRoleStatements property for performing Actions on DynamoDB
@@ -70,7 +70,7 @@ functions:
           method: get
           path: todos
           cors: true
-#           authorizer: Auth
+          authorizer: Auth
 
   # TODO: Configure this function - 
   # Provide iamRoleStatements property. Decide the Actions and AWS Resource. 
