@@ -83,7 +83,7 @@ functions:
           method: post
           path: todos
           cors: true
-#          authorizer: Auth
+          authorizer: Auth
           request:
             schemas:
               application/json: ${file(models/create-todo-model.json)}
@@ -97,7 +97,7 @@ functions:
           method: patch
           path: todos/{todoId}
           cors: true
-#          authorizer: Auth
+          authorizer: Auth
           request:
             schemas:
                 application/json: ${file(models/update-todo-model.json)}
@@ -111,7 +111,7 @@ functions:
           method: delete
           path: todos/{todoId}
           cors: true
-#          authorizer: Auth
+          authorizer: Auth
           
 # 
 #   # TODO: Configure this function
@@ -122,7 +122,8 @@ functions:
       - http:
           method: post
           path: todos/{todoId}/attachment
-
+          authorizer: Auth
+          
 resources:
   Resources:
 #     # Add necessary AWS resources. You will need at least the following AWS resources
