@@ -13,15 +13,16 @@ export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
       console.log('Reading Update target ID')
       const todoId = event.pathParameters.todoId
-      if(!todoId){
-              return { 
-                  statusCode: 401,
-                  body:'Missing TodoId parameter'}
+      if (!todoId) {
+          return {
+              statusCode: 401,
+              body: 'Missing TodoId parameter'
           }
+      }
       console.log('Parsing update request!')
       const updatedItemData: UpdateTodoRequest = JSON.parse(event.body)
-      console.log('Update request parsed:'+updatedItemData)
-      
+      console.log('Update request parsed:' + updatedItemData)
+
       const jwtToken = getToken(event.headers.Authorization)
 
       // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object

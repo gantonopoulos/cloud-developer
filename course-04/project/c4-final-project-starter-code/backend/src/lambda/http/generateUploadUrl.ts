@@ -8,6 +8,7 @@ import {getUploadUrl} from "../../businessLogic/imageAttachment";
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
       const todoId = event.pathParameters.todoId
+      console.log(`Upload-url for:${todoId} requested!`)
       // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
       const url = await getUploadUrl(todoId);
 
@@ -24,9 +25,9 @@ export const handler = middy(
 )
 
 handler
-  .use(httpErrorHandler())
-  .use(
-    cors({
-      credentials: true
-    })
-  )
+    .use(
+        cors({
+            credentials: true
+        }))
+    .use(httpErrorHandler())
+    

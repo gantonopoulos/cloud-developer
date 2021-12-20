@@ -37,6 +37,7 @@ provider:
       statements:
       - Effect: Allow
         Action:
+            - dynamodb:Query
             - dynamodb:Scan
             - dynamodb:PutItem
             - dynamodb:GetItem
@@ -121,6 +122,7 @@ functions:
     events:
       - http:
           method: post
+          cors: true
           path: todos/{todoId}/attachment
           authorizer: Auth
           

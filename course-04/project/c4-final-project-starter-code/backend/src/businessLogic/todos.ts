@@ -29,7 +29,7 @@ export async function createTodo(
         name: createTodoRequest.name,
         dueDate: createTodoRequest.dueDate,
         done: false,
-        attachmentUrl:"TBD"
+        attachmentUrl:`https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${itemId}`
     })
 }
 
@@ -65,4 +65,8 @@ export async function todoExists(todoIdToUpdate: string, jwtToken: string): Prom
         userId: parseUserId(jwtToken)
     }
     return await todoAccess.getTodo(keyOfItemToUpdate);
+}
+
+export async function getTodosForUser(jwtToken: string): Promise<TodoItem[]> {
+    return await todoAccess.getTodosForUser(parseUserId(jwtToken));
 }

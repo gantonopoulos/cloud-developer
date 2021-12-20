@@ -37,6 +37,21 @@ export class TodoAccess {
         return queryResult.Items[0] as TodoItem;
     }
 
+    async getTodosForUser(userId: string): Promise<TodoItem[]> {
+        console.log(`Querying todos for User [${userId}]`)
+        const queryResult = await this.dynamoDbClient
+            .query({
+                TableName: process.env.TODOS_TABLE,
+                KeyConditionExpression:"userId = :userIdToGet",
+                ExpressionAttributeValues:{
+                    ":userIdToGet":userId
+                }
+            })
+            .promise()
+        
+        return queryResult.Items as TodoItem[];
+    }
+
     async createTodo(todoItem: TodoItem) {
         console.log('Creating TODO item ' + todoItem.todoId)
         await this.dynamoDbClient.put({
