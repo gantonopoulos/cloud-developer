@@ -84,8 +84,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
           [pos]: { done: { $set: !todo.done } }
         })
       })
-    } catch {
-      alert('Todo deletion failed')
+    } catch (error){
+      alert(`Todo update failed:${error}`)
     }
   }
 

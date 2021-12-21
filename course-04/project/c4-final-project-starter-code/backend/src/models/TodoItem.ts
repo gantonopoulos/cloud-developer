@@ -7,3 +7,9 @@ export interface TodoItem {
   done: boolean
   attachmentUrl?: string
 }
+
+
+export interface TodoItemKey {
+  userId: string
+  todoId: string
+}
