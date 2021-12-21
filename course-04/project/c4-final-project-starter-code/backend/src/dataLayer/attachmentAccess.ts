@@ -1,10 +1,12 @@
 import * as AWS from "aws-sdk";
+const AWSXRay = require('aws-xray-sdk')
 
+const XAWS = AWSXRay.captureAWS(AWS)
 
 export class AttachmentAccess {
         
     constructor(
-        private readonly s3Client: AWS.S3 = new AWS.S3({signatureVersion: 'v4'})
+        private readonly s3Client = new XAWS.S3({signatureVersion: 'v4'})
     )
     {}
     

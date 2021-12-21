@@ -16,9 +16,9 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'eu-central-1'}
 
-#   tracing:
-#     lambda: true
-#     apiGateway: true
+  tracing:
+    lambda: true
+    apiGateway: true
 
 #   # Use these variables in the functions and resources section below. For example, 
 #   # ${self:provider.environment.ATTACHMENT_S3_BUCKET}
