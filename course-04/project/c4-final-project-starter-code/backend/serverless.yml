@@ -27,6 +27,7 @@ provider:
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
     ATTACHMENT_S3_BUCKET: serverless-gantonopoulos-todo-images-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
+    JWKS_URL: 'https://gantonopoulos.eu.auth0.com/.well-known/jwks.json'
 
   logs:
 #     # Enable API Gateway logs
@@ -90,6 +91,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action: 
+            - dynamodb:Query        
             - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
                 

@@ -2,9 +2,12 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import {TodoItem, TodoItemKey} from "../models/TodoItem";
 import {TodoUpdate} from "../models/TodoUpdate";
 import * as AWS from "aws-sdk"
+import {createLogger} from "../utils/logger";
 const AWSXRay = require('aws-xray-sdk')
 
 const XAWS = AWSXRay.captureAWS(AWS)
+
+const logger = createLogger('TodoAccess')
 
 export class TodoAccess {
 
@@ -13,20 +16,8 @@ export class TodoAccess {
     ) {      
     }
     
-    async getAllTodos(): Promise<TodoItem[]> {
-        console.log('Getting all TODO items!')
-        const todos = await this.dynamoDbClient
-            .scan({
-                TableName: process.env.TODOS_TABLE,
-                IndexName: process.env.TODOS_CREATED_AT_INDEX,
-            })
-            .promise()
-        console.log('Found '+todos.Count+' items!')
-        return todos.Items as TodoItem[];
-    }
-
     async getTodo(withKey:TodoItemKey): Promise<TodoItem> {
-        console.log('Querying todo [Id,UserId] :[' + withKey.todoId + "," + withKey.userId + "]")
+        logger.info('Querying todo [Id,UserId] :[' + withKey.todoId + "," + withKey.userId + "]")
         const queryResult = await this.dynamoDbClient
             .query({
                 TableName: process.env.TODOS_TABLE,
@@ -37,12 +28,12 @@ export class TodoAccess {
                 }
             })
             .promise()
-        
+
         return queryResult.Items[0] as TodoItem;
     }
-
+    
     async getTodosForUser(userId: string): Promise<TodoItem[]> {
-        console.log(`Querying todos for User [${userId}]`)
+        logger.info(`Querying Todos for User [${userId}]`)
         const queryResult = await this.dynamoDbClient
             .query({
                 TableName: process.env.TODOS_TABLE,
@@ -57,7 +48,7 @@ export class TodoAccess {
     }
 
     async createTodo(todoItem: TodoItem) {
-        console.log('Creating TODO item ' + todoItem.todoId)
+        logger.info(`Creating Todo item with Id:[${todoItem.todoId}]`)
         await this.dynamoDbClient.put({
             TableName: process.env.TODOS_TABLE,
             Item: todoItem
@@ -67,8 +58,7 @@ export class TodoAccess {
     }
 
     async updateTodo(keyOfItemToUpdate:TodoItemKey, updatedItemData: TodoUpdate) {
-
-        console.log('Updating TODO item ' + keyOfItemToUpdate.todoId)
+        logger.info(`Updating Todo item with Id:[${keyOfItemToUpdate.todoId}]`)
         const updateParams:DocumentClient.UpdateItemInput = {
             TableName: process.env.TODOS_TABLE,
             Key: {
@@ -87,13 +77,13 @@ export class TodoAccess {
             ReturnValues: "ALL_NEW"
         }
 
-        console.log('Sending update params' + JSON.stringify(updateParams))
+        logger.info('Sending update params' + JSON.stringify(updateParams))
         await this.dynamoDbClient.update(updateParams).promise()
     }
 
     async deleteTodo(keyOfItemToUpdate:TodoItemKey) {
 
-        console.log('Updating TODO item ' + keyOfItemToUpdate.todoId)
+        logger.info('Deleting Todo item ' + keyOfItemToUpdate.todoId)
         const deleteItemInput:DocumentClient.DeleteItemInput = {
             TableName: process.env.TODOS_TABLE,
             Key: {
@@ -102,7 +92,7 @@ export class TodoAccess {
             },
         }
 
-        console.log('Sending update params' + JSON.stringify(deleteItemInput))
+        logger.info('Sending delete params' + JSON.stringify(deleteItemInput))
         await this.dynamoDbClient.delete(deleteItemInput).promise()
     }
 }

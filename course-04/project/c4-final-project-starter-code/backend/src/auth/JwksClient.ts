@@ -1,17 +1,19 @@
 import {JwksKey, JwksSigningKey} from "./JwksKey";
 import Axios from "axios";
+import {createLogger} from "../utils/logger";
+
+const logger = createLogger('JwksClient')
 
 /// Taken from https://auth0.com/blog/navigating-rs256-and-jwks/
 export class JwksClient {
 
-    
-    async downloadJwksVerificationKeys(downloadUrl: string): Promise<JwksSigningKey[]> {
-        console.log('Downloading keys from:' + downloadUrl)
+    private static async downloadJwksVerificationKeys(downloadUrl: string): Promise<JwksSigningKey[]> {
+        logger.info('Downloading keys from:' + downloadUrl)
         const certificate = await Axios.get(downloadUrl);
         if (!certificate)
             throw new Error('Could not download keys from:' + downloadUrl)
         
-        console.log('Got Certificate object' + JSON.stringify(certificate.data))
+        logger.info('Certificate retrieval was successful!')
         
         const result = certificate.data.keys as JwksKey[]
         if (!result || !result.length)
@@ -27,7 +29,7 @@ export class JwksClient {
         return cert;
     }
 
-    private getVerificationKeys(keys: JwksKey[]): JwksSigningKey[] {
+    private static getVerificationKeys(keys: JwksKey[]): JwksSigningKey[] {
         let isVerificationKey = key => 
             key.use == 'sig'
             && key.alg == 'RS256'
@@ -49,11 +51,10 @@ export class JwksClient {
         return verificationKeys
     }
 
-    getCertificateFor(kid:string, keys: JwksSigningKey[]):string
-    {
-        console.log(`Looking for [${kid}]\n in [${keys}]`)
-        const signingKey = keys.find(key => key.kid === kid);
-
+    static async getCertificateFor(kid: string): Promise<string> {
+        const jwksKeys: JwksSigningKey[] = await JwksClient.downloadJwksVerificationKeys(process.env.JWKS_URL)
+        
+        const signingKey = jwksKeys.find(key => key.kid === kid);
         if (!signingKey) {
             throw new Error(`Unable to find a signing key that matches '${kid}'`);
         }
